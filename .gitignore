@@ -1,0 +1,34 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+TestResults/
+*.trx
+coverage*.xml
+
+# IDE / user files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.swp
+.DS_Store
+
+# Secrets and local overrides — NEVER commit real values (HIPAA rule 3)
+secrets.json
+*.local.json
+appsettings.*.local.json
+appsettings.Production.json
+appsettings.Staging.json
+.env
+.env.*
+*.pfx
+*.pem
+*.key
+
+# Data — synthetic only, and generated data stays out of git
+scripts/synthea/output/
+*.ndjson

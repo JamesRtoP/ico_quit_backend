@@ -1,0 +1,16 @@
+# Local HAPI FHIR R4 server for development. Synthetic data only.
+# FHIR base URL: http://localhost:8080/fhir
+services:
+  hapi:
+    image: hapiproject/hapi:latest
+    container_name: medapp-hapi
+    ports:
+      # Bound to loopback only so the dev FHIR server isn't reachable from the network.
+      - "127.0.0.1:8080:8080"
+    environment:
+      hapi.fhir.fhir_version: R4
+      # Allow the seed script to PUT resources with stable ids like "medapp-seed-a".
+      hapi.fhir.client_id_strategy: ALPHANUMERIC
+      # Don't serve cached search results; a dose recorded a moment ago must show up immediately.
+      hapi.fhir.reuse_cached_search_results_millis: 0
+    restart: unless-stopped

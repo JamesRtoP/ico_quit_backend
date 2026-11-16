@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- Test-code naming/async conventions differ from library code. -->
+    <NoWarn>$(NoWarn);CA1707;CA2007;CA1515;CA1001;CA1063;CA1816;CA1849;CA2234;CA1062;CA1307;CA1310;CA1861;CA1305</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Xunit.SkippableFact" />
+    <PackageReference Include="Testcontainers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MedApp.Api\MedApp.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Same synthetic seed data the local seed script loads: one source of truth. -->
+    <None Include="..\..\..\scripts\seed\seed-bundle.json" Link="Seed\seed-bundle.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

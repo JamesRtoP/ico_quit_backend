@@ -1,0 +1,161 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "meta": { "tag": [ { "system": "https://medapp.example/tags", "code": "synthetic", "display": "Synthetic test data - not a real person" } ] },
+  "entry": [
+    {
+      "fullUrl": "Patient/medapp-seed-a",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "medapp-seed-a",
+        "meta": { "tag": [ { "system": "https://medapp.example/tags", "code": "synthetic" } ] },
+        "identifier": [ { "system": "https://medapp.example/external-id", "value": "11111111-1111-4111-8111-111111111111" } ],
+        "name": [ { "family": "Quillfeather", "given": [ "Avery" ] } ],
+        "gender": "female",
+        "birthDate": "1971-03-14"
+      },
+      "request": { "method": "PUT", "url": "Patient/medapp-seed-a" }
+    },
+    {
+      "fullUrl": "Patient/medapp-seed-b",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "medapp-seed-b",
+        "meta": { "tag": [ { "system": "https://medapp.example/tags", "code": "synthetic" } ] },
+        "identifier": [ { "system": "https://medapp.example/external-id", "value": "22222222-2222-4222-8222-222222222222" } ],
+        "name": [ { "family": "Thornbury", "given": [ "Blake" ] } ],
+        "gender": "male",
+        "birthDate": "1984-09-02"
+      },
+      "request": { "method": "PUT", "url": "Patient/medapp-seed-b" }
+    },
+    {
+      "fullUrl": "MedicationRequest/medapp-seed-a-mr1",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medapp-seed-a-mr1",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [ { "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "314076", "display": "Lisinopril 10 MG Oral Tablet" } ],
+          "text": "Lisinopril 10 MG Oral Tablet"
+        },
+        "subject": { "reference": "Patient/medapp-seed-a" },
+        "authoredOn": "2026-10-01",
+        "dosageInstruction": [ {
+          "text": "Take 1 tablet by mouth once daily in the morning",
+          "timing": { "repeat": { "frequency": 1, "period": 1, "periodUnit": "d", "timeOfDay": [ "08:00:00" ] } }
+        } ]
+      },
+      "request": { "method": "PUT", "url": "MedicationRequest/medapp-seed-a-mr1" }
+    },
+    {
+      "fullUrl": "MedicationRequest/medapp-seed-a-mr2",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medapp-seed-a-mr2",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [ { "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "861007", "display": "Metformin hydrochloride 500 MG Oral Tablet" } ],
+          "text": "Metformin hydrochloride 500 MG Oral Tablet"
+        },
+        "subject": { "reference": "Patient/medapp-seed-a" },
+        "authoredOn": "2026-10-01",
+        "dosageInstruction": [ {
+          "text": "Take 1 tablet by mouth twice daily with meals",
+          "timing": { "repeat": { "frequency": 2, "period": 1, "periodUnit": "d", "timeOfDay": [ "08:00:00", "18:00:00" ] } }
+        } ]
+      },
+      "request": { "method": "PUT", "url": "MedicationRequest/medapp-seed-a-mr2" }
+    },
+    {
+      "fullUrl": "MedicationRequest/medapp-seed-a-mr3",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medapp-seed-a-mr3",
+        "status": "stopped",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [ { "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "617310", "display": "Atorvastatin 20 MG Oral Tablet" } ],
+          "text": "Atorvastatin 20 MG Oral Tablet"
+        },
+        "subject": { "reference": "Patient/medapp-seed-a" },
+        "authoredOn": "2026-06-01",
+        "dosageInstruction": [ {
+          "text": "Take 1 tablet by mouth at bedtime",
+          "timing": { "repeat": { "frequency": 1, "period": 1, "periodUnit": "d", "timeOfDay": [ "21:00:00" ] } }
+        } ]
+      },
+      "request": { "method": "PUT", "url": "MedicationRequest/medapp-seed-a-mr3" }
+    },
+    {
+      "fullUrl": "MedicationRequest/medapp-seed-b-mr1",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medapp-seed-b-mr1",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [ { "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "312941", "display": "Sertraline 50 MG Oral Tablet" } ],
+          "text": "Sertraline 50 MG Oral Tablet"
+        },
+        "subject": { "reference": "Patient/medapp-seed-b" },
+        "authoredOn": "2026-09-15",
+        "dosageInstruction": [ {
+          "text": "Take 1 tablet by mouth once daily",
+          "timing": { "repeat": { "frequency": 1, "period": 1, "periodUnit": "d", "timeOfDay": [ "09:00:00" ] } }
+        } ]
+      },
+      "request": { "method": "PUT", "url": "MedicationRequest/medapp-seed-b-mr1" }
+    },
+    {
+      "fullUrl": "MedicationAdministration/medapp-seed-a-ma1",
+      "resource": {
+        "resourceType": "MedicationAdministration",
+        "id": "medapp-seed-a-ma1",
+        "status": "completed",
+        "medicationCodeableConcept": {
+          "coding": [ { "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "314076", "display": "Lisinopril 10 MG Oral Tablet" } ],
+          "text": "Lisinopril 10 MG Oral Tablet"
+        },
+        "subject": { "reference": "Patient/medapp-seed-a" },
+        "request": { "reference": "MedicationRequest/medapp-seed-a-mr1" },
+        "effectiveDateTime": "2026-11-10T08:05:00Z"
+      },
+      "request": { "method": "PUT", "url": "MedicationAdministration/medapp-seed-a-ma1" }
+    },
+    {
+      "fullUrl": "MedicationAdministration/medapp-seed-a-ma2",
+      "resource": {
+        "resourceType": "MedicationAdministration",
+        "id": "medapp-seed-a-ma2",
+        "status": "not-done",
+        "medicationCodeableConcept": {
+          "coding": [ { "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "861007", "display": "Metformin hydrochloride 500 MG Oral Tablet" } ],
+          "text": "Metformin hydrochloride 500 MG Oral Tablet"
+        },
+        "subject": { "reference": "Patient/medapp-seed-a" },
+        "request": { "reference": "MedicationRequest/medapp-seed-a-mr2" },
+        "effectiveDateTime": "2026-11-10T18:10:00Z"
+      },
+      "request": { "method": "PUT", "url": "MedicationAdministration/medapp-seed-a-ma2" }
+    },
+    {
+      "fullUrl": "MedicationAdministration/medapp-seed-b-ma1",
+      "resource": {
+        "resourceType": "MedicationAdministration",
+        "id": "medapp-seed-b-ma1",
+        "status": "completed",
+        "medicationCodeableConcept": {
+          "coding": [ { "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "312941", "display": "Sertraline 50 MG Oral Tablet" } ],
+          "text": "Sertraline 50 MG Oral Tablet"
+        },
+        "subject": { "reference": "Patient/medapp-seed-b" },
+        "request": { "reference": "MedicationRequest/medapp-seed-b-mr1" },
+        "effectiveDateTime": "2026-11-10T09:02:00Z"
+      },
+      "request": { "method": "PUT", "url": "MedicationAdministration/medapp-seed-b-ma1" }
+    }
+  ]
+}
