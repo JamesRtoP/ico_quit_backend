@@ -68,3 +68,25 @@ Both endpoints are **stubs**: they check auth and input, then return `501`. They
 
 ## D13. No Swagger UI; the OpenAPI spec is a committed file
 Swagger UI (and the Swashbuckle package) was removed, and the running API no longer serves `/openapi/v1.json` in Development. The OpenAPI document is still generated, but only in the Testing environment, where `Contract_MatchesSnapshot` compares it with `docs/openapi.json`. That file is the contract for the chatbot: Azure AI Foundry imports an OpenAPI spec to let an agent call an API, so it must stay accurate. Regenerate it with `UPDATE_OPENAPI_SNAPSHOT=1` after an intended contract change.
+
+## D14. iCO breath CO readings as FHIR Observations
+`POST /user/co-readings` stores one Observation per breath test from the Bedfont iCO Smokerlyzer, for the caller only (`subject` set server-side). `GET /user/co-readings` returns the caller's history.
+- **Offline sync:** the app may queue readings and send them later, so the API keeps the phone's `measuredAt` and validates it: no more than 5 minutes in the future, no older than 366 days. Each reading carries a `clientReadingId` (GUID), stored as an Observation identifier. Re-sending the same id returns the stored reading with `200` instead of creating a duplicate. The lookup is scoped to the caller, so reusing another patient's id never reveals their reading.
+- **What the app sends:** only completed tests. SDK `SUCCESS` → `reliability: "stable"`, stored with status `final`. `SUCCESS_FAILED_TO_STABILISE` → `"unstable"`, stored as `preliminary`, so it is kept but never mistaken for a verified result. Error statuses are not sent.
+- **Not accepted:** the device serial number (a HIPAA identifier), battery, firmware and usage. Add them only with a stated need; the serial would belong in a FHIR `Device`.
+- **Logging:** CO values are PHI and are never logged.
+
+**Assumptions to confirm with the client:**
+- **The code.** The Observation code is a **placeholder** (`https://medapp.example/codes|exhaled-co`) until the client confirms the LOINC code for exhaled CO and the threshold the program uses.
+- **The valid range.** `ppm` is accepted from 0 to 500, assumed to be the device range.
+- **Unstable readings.** Storing them flagged rather than rejecting them is an open question in the SDK notes.
+
+**Follow-up:** the "search, then create" for idempotency can race if the same reading is sent twice at the same moment. If that matters, switch to a FHIR conditional create.
+
+## D15. Patient chat messages stored as FHIR Communications; relay is a stub
+`POST /user/chat-messages` stores the patient's message as a Communication:
+- `subject` and `sender` are the caller, set server-side;
+- `category` is `patient-chat-message`;
+- the text is in `payload.contentString`, and the phone's `sentAt` is in `sent`.
+
+The message is idempotent on `clientMessageId`, like readings. The text is PHI: it is never logged, and it is not echoed back in the response. Forwarding the message to the Foundry chatbot is **not implemented**; it's marked as a stub in code. There is no endpoint to list messages yet.

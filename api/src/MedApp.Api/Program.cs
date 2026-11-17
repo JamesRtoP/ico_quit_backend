@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using MedApp.Api.Auth;
 using MedApp.Api.Chatbot;
@@ -17,6 +19,11 @@ builder.Services.AddMedAppAuthentication(builder.Configuration, builder.Environm
 builder.Services.AddFhirGateway(builder.Configuration);
 builder.Services.AddScoped<ICallerPatientResolver, CallerPatientResolver>();
 builder.Services.AddScoped<CallerPatient>();
+builder.Services.AddSingleton(TimeProvider.System);
+
+// Enums as camelCase strings ("stable"); integers rejected so clients can't depend on enum order.
+builder.Services.ConfigureHttpJsonOptions(o =>
+    o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)));
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<SafeExceptionHandler>();

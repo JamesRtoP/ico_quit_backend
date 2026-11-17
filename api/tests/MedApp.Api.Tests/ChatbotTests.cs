@@ -56,7 +56,7 @@ public sealed class ChatbotTests(InMemoryBackend backend) : IClassFixture<InMemo
         await client.GetAsync("/chatbot/context");
         await client.PostAsJsonAsync("/chatbot/responses", new { text = "Synthetic reply." });
 
-        Assert.All(backend.Gateway.Calls, call => Assert.Equal("Patient?identifier", call));
+        Assert.All(backend.Gateway.Calls, call => Assert.Equal("Patient?identifier", call.Operation));
     }
 
     [Fact]

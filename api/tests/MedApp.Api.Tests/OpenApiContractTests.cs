@@ -13,13 +13,13 @@ namespace MedApp.Api.Tests;
 public sealed class OpenApiContractTests(InMemoryBackend backend) : IClassFixture<InMemoryBackend>
 {
     [Fact]
-    public async Task Contract_ExposesChatbotEndpoints_WithBearerAuth()
+    public async Task Contract_ExposesExpectedEndpoints_WithBearerAuth()
     {
         using var client = backend.Factory.Client();
         var doc = JsonNode.Parse(await client.GetStringAsync("/openapi/v1.json"))!;
 
         var paths = doc["paths"]!.AsObject().Select(p => p.Key).Order().ToList();
-        Assert.Equal(["/chatbot/context", "/chatbot/responses"], paths);
+        Assert.Equal(["/chatbot/context", "/chatbot/responses", "/user/chat-messages", "/user/co-readings"], paths);
         Assert.NotNull(doc["components"]?["securitySchemes"]?["Bearer"]);
 
         // No endpoint takes a patient identifier from the client.

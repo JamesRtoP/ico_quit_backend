@@ -6,7 +6,6 @@ namespace MedApp.Api.Users;
 /// <c>/user/*</c>: endpoints the patient app calls with the signed-in patient's own token.
 /// Every endpoint here acts on the caller only: <see cref="CallerPatientFilter"/> resolves the token's oid
 /// to the caller's FHIR Patient, and no endpoint accepts a patient id (HIPAA rule 1).
-/// There are no endpoints yet: medications and doses are not currently supported.
 /// </summary>
 internal static class UserEndpoints
 {
@@ -16,5 +15,7 @@ internal static class UserEndpoints
             .AddEndpointFilter<CallerPatientFilter>()
             .WithTags("User")
             .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .ProducesProblem(StatusCodes.Status403Forbidden);
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .MapCoReadingEndpoints()
+            .MapChatMessageEndpoints();
 }

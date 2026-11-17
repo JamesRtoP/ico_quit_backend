@@ -31,7 +31,7 @@ Check it's up (anonymous, empty 200):
 curl -k -i https://localhost:7180/status
 ```
 
-`/user/*` (none yet) and `/chatbot/*` both act on the patient in the token: its `oid` must match the
+`/user/*` (iCO readings, chat messages) and `/chatbot/*` both act on the patient in the token: its `oid` must match the
 `https://medapp.example/external-id` identifier of a **synthetic** Patient in the FHIR service, or the API returns `403`.
 
 `/chatbot/*` also needs the token to be issued to the chatbot app (`azp` = `Chatbot:ClientId`, which is
