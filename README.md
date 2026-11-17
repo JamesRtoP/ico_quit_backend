@@ -9,33 +9,34 @@ Backend API for a medication-adherence app. ASP.NET Core (.NET 10) minimal APIs 
 
 ## Prerequisites
 - .NET SDK 10.0.100 or later (see `global.json`)
-- Docker, for the local HAPI FHIR server and the HAPI integration tests
+- Azure CLI (`az login`), once you have access to the FHIR service
 
 ## Run locally
 
+There is no local FHIR server. In Development the API calls the real Azure Health Data Services FHIR
+service using your `az login` identity (`Fhir:UseManagedIdentity=true` → `DefaultAzureCredential`).
+Your account needs a FHIR data role (e.g. FHIR Data Contributor) on the service.
+
 ```bash
-docker compose up -d                 # HAPI FHIR at http://localhost:8080/fhir (takes about 1 minute to start)
-./scripts/seed.sh                    # or: pwsh ./scripts/seed.ps1   (synthetic patients, idempotent)
+az login
+dotnet user-secrets set Fhir:Url https://<workspace>-<fhir>.fhir.azurehealthcareapis.com --project api/src/MedApp.Api
 dotnet run --project api/src/MedApp.Api --launch-profile https
 ```
 
-Get a token for a seeded test patient:
+Until `Fhir:Url` is set, the API refuses to start (fail closed).
+
+Get a token whose `oid` matches the `https://medapp.example/external-id` identifier of a **synthetic**
+Patient in that FHIR service:
 
 ```bash
-dotnet user-jwts create --project api/src/MedApp.Api --claim oid=11111111-1111-4111-8111-111111111111
+dotnet user-jwts create --project api/src/MedApp.Api --claim oid=<patient-oid>
 ```
-
-| Test user | oid | FHIR Patient |
-|---|---|---|
-| A | `11111111-1111-4111-8111-111111111111` | `medapp-seed-a` (2 active meds, 1 stopped) |
-| B | `22222222-2222-4222-8222-222222222222` | `medapp-seed-b` |
-| Unlinked | `33333333-3333-4333-8333-333333333333` | none, so the API returns 403 |
 
 ```bash
 curl -k https://localhost:7180/me/medications -H "Authorization: Bearer <token>"
 ```
 
-Swagger UI (Development only) is at https://localhost:7180/swagger.
+A valid token with no linked Patient gets 403. Swagger UI (Development only) is at https://localhost:7180/swagger.
 
 ## Test
 
@@ -43,8 +44,8 @@ Swagger UI (Development only) is at https://localhost:7180/swagger.
 dotnet test api
 ```
 
-- Fast tests use an in-memory FHIR fake and run anywhere.
-- The HAPI tests (`Category=Integration`) start `hapiproject/hapi` with Testcontainers. If Docker is missing they skip. CI sets `MEDAPP_REQUIRE_DOCKER_TESTS=true`, so there they fail instead of skipping.
+- All tests run in-process against an in-memory FHIR fake (`InMemoryFhirGateway`) loaded with synthetic data from `api/tests/MedApp.Api.Tests/TestData/seed-bundle.json`. No Docker or network needed.
+- Tests against the real FHIR service are a follow-up once access exists.
 
 ## Configuration
 

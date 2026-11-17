@@ -1,6 +1,6 @@
 namespace MedApp.Api.Tests.Support;
 
-/// <summary>Ids and PHI-like strings from scripts/seed/seed-bundle.json (all synthetic).</summary>
+/// <summary>Ids and PHI-like strings from TestData/seed-bundle.json (all synthetic).</summary>
 public static class SeedData
 {
     public const string OidA = "11111111-1111-4111-8111-111111111111";
@@ -28,5 +28,5 @@ public static class SeedData
         OidA, OidB, OidUnlinked,
     ];
 
-    public static string BundlePath => Path.Combine(AppContext.BaseDirectory, "Seed", "seed-bundle.json");
+    public static string BundlePath => Path.Combine(AppContext.BaseDirectory, "TestData", "seed-bundle.json");
 }

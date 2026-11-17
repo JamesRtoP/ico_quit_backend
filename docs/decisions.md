@@ -32,8 +32,8 @@ A MedicationRequest that belongs to someone else returns `404`, the same as a mi
 - `SafeExceptionHandler` logs only the exception **type**, route, status and trace id. It never logs the message, because FHIR OperationOutcomes and serializer errors can echo content. The framework's own unhandled-exception log is suppressed.
 - Tests capture all logs at Trace level and assert that seeded names, birth dates, medication names and user oids never appear.
 
-## D7. FHIR search caching
-HAPI reuses cached search results by default, which would hide a dose that was just recorded. The FHIR HttpClient sends `Cache-Control: no-cache`, and docker-compose also sets `reuse_cached_search_results_millis=0`.
+## D7. No local FHIR server
+The local HAPI server (docker-compose, seed scripts, Testcontainers tests) was removed. Development runs against the real Azure Health Data Services FHIR service with `az login` credentials, and automated tests use the in-memory fake. Integration tests against the real service come once access exists.
 
 ## D8. Managed identity is a config switch
 `Fhir:UseManagedIdentity=true` adds `ManagedIdentityTokenHandler` (DefaultAzureCredential, scope `<fhir authority>/.default`) to the FHIR HttpClient. The handler only sends a token to the configured HTTPS FHIR host. Business logic doesn't change.
@@ -41,9 +41,7 @@ HAPI reuses cached search results by default, which would hide a dose that was j
 ## D9. Telemetry
 Azure Monitor OpenTelemetry is enabled only when `APPLICATIONINSIGHTS_CONNECTION_STRING` (or `AzureMonitor:ConnectionString`) is set. Before enabling it in Azure, check that HTTP client spans redact query strings. Recent OTel versions do this by default.
 
-## D10. Tests: one scenario suite, two backends
-`OwnershipScenarios` runs against:
-- `InMemoryFhirGateway`, loaded from the seed bundle. This is fast, needs no Docker, and also checks that every FHIR call was scoped to the caller.
-- Real HAPI via Testcontainers, using the real Firely gateway and the same seed bundle. These tests skip when Docker isn't available, unless `MEDAPP_REQUIRE_DOCKER_TESTS=true`. CI sets that, so a missing Docker daemon fails the build instead of silently skipping.
+## D10. Tests run against an in-memory FHIR fake
+`OwnershipTests` and the other suites run against `InMemoryFhirGateway`, loaded from `TestData/seed-bundle.json`. It mimics the FHIR searches the gateway uses and records every call, so tests can check that every FHIR call was scoped to the caller. The real `FirelyFhirGateway` is not exercised by automated tests yet.
 
-**Follow-up:** pin `hapiproject/hapi` to a specific tag (with `MEDAPP_HAPI_IMAGE` for tests) so CI doesn't change under us.
+**Follow-up:** add integration tests against the Azure FHIR service (synthetic data only) once access exists.

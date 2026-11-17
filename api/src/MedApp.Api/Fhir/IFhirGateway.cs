@@ -6,7 +6,7 @@ namespace MedApp.Api.Fhir;
 /// <summary>
 /// All FHIR access goes through this interface. Every patient-data method takes the caller's
 /// Patient id and MUST constrain the FHIR query with <c>subject=Patient/{patientId}</c>.
-/// Implementations: <see cref="FirelyFhirGateway"/> (HAPI locally, Azure Health Data Services in Azure).
+/// Implementations: <see cref="FirelyFhirGateway"/> (Azure Health Data Services FHIR service).
 /// </summary>
 public interface IFhirGateway
 {

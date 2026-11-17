@@ -11,7 +11,7 @@ namespace MedApp.Api.Tests.Support;
 
 /// <summary>
 /// Hosts the real API in-process ("Testing" environment, LocalJwt auth, all logs captured at Trace).
-/// FHIR is either a real server (<paramref name="fhirUrl"/>) or a replacement <see cref="IFhirGateway"/>.
+/// FHIR is normally replaced by an in-memory <see cref="IFhirGateway"/>; <paramref name="fhirUrl"/> only feeds config validation.
 /// </summary>
 public sealed class MedAppFactory(
     string fhirUrl = "http://fhir.invalid/fhir",

@@ -6,7 +6,7 @@ public sealed class FhirOptions
 {
     public const string SectionName = "Fhir";
 
-    /// <summary>FHIR base URL, e.g. http://localhost:8080/fhir or https://&lt;workspace&gt;-&lt;fhir&gt;.fhir.azurehealthcareapis.com.</summary>
+    /// <summary>FHIR base URL, e.g. https://&lt;workspace&gt;-&lt;fhir&gt;.fhir.azurehealthcareapis.com.</summary>
     [Required]
     [Url]
     public string Url { get; set; } = "";

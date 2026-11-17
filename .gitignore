@@ -30,5 +30,4 @@ appsettings.Staging.json
 *.key
 
 # Data — synthetic only, and generated data stays out of git
-scripts/synthea/output/
 *.ndjson

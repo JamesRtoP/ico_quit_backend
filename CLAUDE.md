@@ -9,7 +9,7 @@ There is no Azure access yet, so everything must run and be tested locally.
 ## Architecture (target, for context)
 Mobile app → Application Gateway (WAF) → this API (Azure App Service) → Azure Health Data Services FHIR service (private endpoint).
 - Patient sign-in: Microsoft Entra External ID (OIDC). The API validates JWT bearer tokens.
-- API → FHIR: managed identity token in Azure. Locally, no auth against HAPI.
+- API → FHIR: managed identity token in Azure; locally the same handler uses your `az login` (DefaultAzureCredential). There is no local FHIR server.
 - No SQL database. All data lives in FHIR (decision: FHIR-only; add SQL only if a real need appears).
 - A client-owned Foundry chatbot will call this API later, so keep the endpoints and OpenAPI contract reusable by it.
 
@@ -20,23 +20,21 @@ Mobile app → Application Gateway (WAF) → this API (Azure App Service) → Az
 - `Azure.Identity` (DefaultAzureCredential), used only by `ManagedIdentityTokenHandler` when `Fhir:UseManagedIdentity=true`
 - `Azure.Monitor.OpenTelemetry.AspNetCore`, enabled only when a connection string is set
 - Built-in `Microsoft.AspNetCore.OpenApi` + Swagger UI (Development only). Contract snapshot is in `docs/openapi.json`.
-- Tests: xUnit, WebApplicationFactory, Testcontainers (HAPI). Package versions are in `api/Directory.Packages.props`.
+- Tests: xUnit, WebApplicationFactory, in-memory `IFhirGateway` fake. Package versions are in `api/Directory.Packages.props`.
 
 ## Repo layout
 ```
 /api/MedApp.sln
 /api/src/MedApp.Api/          API (Auth/, Fhir/, Patients/, Medications/, Infrastructure/)
-/api/tests/MedApp.Api.Tests/  tests; OwnershipScenarios run against both in-memory FHIR and HAPI
-/docker-compose.yml           local HAPI FHIR server
-/scripts/                     seed.sh / seed.ps1 + seed/seed-bundle.json (also used by tests)
+/api/tests/MedApp.Api.Tests/  tests (in-memory FHIR fake; synthetic data in TestData/seed-bundle.json)
 /.github/workflows/pr.yml     build + test on PR
 /docs/                        api-contract.md, decisions.md, openapi.json
 ```
 
 ## Local dev commands
 ```bash
-docker compose up -d                       # HAPI FHIR at http://localhost:8080/fhir
-./scripts/seed.sh                          # synthetic test patients A/B (see README for oids)
+az login                                   # identity used to call the Azure FHIR service
+dotnet user-secrets set Fhir:Url <azure-fhir-url> --project api/src/MedApp.Api
 dotnet build api
 dotnet test api
 dotnet run --project api/src/MedApp.Api --launch-profile https

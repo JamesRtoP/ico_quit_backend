@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Extensions.Options;
@@ -21,8 +20,6 @@ internal static class FhirServiceCollectionExtensions
             var options = sp.GetRequiredService<IOptions<FhirOptions>>().Value;
             http.BaseAddress = new Uri(options.Url.TrimEnd('/') + "/");
             http.Timeout = TimeSpan.FromSeconds(30);
-            // HAPI caches search results by default; a dose recorded a moment ago must be visible immediately.
-            http.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
         });
 
         if (useManagedIdentity)
