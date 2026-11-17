@@ -41,15 +41,36 @@ public sealed class ConfigurationTests
     }
 
     [Fact]
-    public async Task Production_DoesNotExposeOpenApiOrSwagger_AndHealthzStillWorks()
+    public async Task Production_DoesNotExposeOpenApiOrSwagger_AndStatusStillWorks()
     {
         using var factory = new MedAppFactory(gateway: InMemoryFhirGateway.FromSeed(), environment: "Production", extraSettings: FakeExternalId);
         using var client = factory.Client();
 
         Assert.NotEqual(HttpStatusCode.OK, (await client.GetAsync("/openapi/v1.json")).StatusCode);
         Assert.NotEqual(HttpStatusCode.OK, (await client.GetAsync("/swagger/index.html")).StatusCode);
-        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/healthz")).StatusCode);
-        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/me/medications")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/status")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/chatbot/context")).StatusCode);
+    }
+
+    [Fact]
+    public async Task ChatbotClientIdNotConfigured_DeniesEveryChatbotCall()
+    {
+        using var factory = new MedAppFactory(gateway: InMemoryFhirGateway.FromSeed(),
+            extraSettings: new Dictionary<string, string> { ["Chatbot:ClientId"] = "" });
+        using var client = factory.ChatbotClient();
+
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.GetAsync("/chatbot/context")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Development_DoesNotServeOpenApiOrSwagger()
+    {
+        using var factory = new MedAppFactory(gateway: InMemoryFhirGateway.FromSeed(), environment: "Development");
+        using var client = factory.ClientFor(SeedData.OidA); // even a signed-in caller gets nothing
+
+        Assert.NotEqual(HttpStatusCode.OK, (await client.GetAsync("/openapi/v1.json")).StatusCode);
+        Assert.NotEqual(HttpStatusCode.OK, (await client.GetAsync("/swagger/index.html")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/status")).StatusCode);
     }
 
     [Fact]
@@ -57,7 +78,7 @@ public sealed class ConfigurationTests
     {
         using var factory = new MedAppFactory(gateway: InMemoryFhirGateway.FromSeed());
         using var client = factory.Client();
-        using var request = new HttpRequestMessage(HttpMethod.Options, "/me/medications");
+        using var request = new HttpRequestMessage(HttpMethod.Options, "/chatbot/context");
         request.Headers.Add("Origin", "https://evil.example");
         request.Headers.Add("Access-Control-Request-Method", "GET");
 

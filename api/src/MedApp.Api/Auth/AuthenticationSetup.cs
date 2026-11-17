@@ -20,6 +20,15 @@ internal static class AuthenticationSetup
     public const string ModeLocalJwt = "LocalJwt";
     public const string TestingEnvironment = "Testing";
 
+    /// <summary>
+    /// Authorization policy for <c>/chatbot/*</c>: a delegated (on-behalf-of) token that was issued to the chatbot's
+    /// client application. The patient still comes from the token's <c>oid</c> (via CallerPatientFilter).
+    /// </summary>
+    public const string ChatbotPolicy = "Chatbot";
+
+    /// <summary>Config key holding the chatbot app registration's client id. Empty or missing denies every chatbot call.</summary>
+    public const string ChatbotClientIdKey = "Chatbot:ClientId";
+
     public static IServiceCollection AddMedAppAuthentication(
         this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
@@ -58,9 +67,27 @@ internal static class AuthenticationSetup
 
         // Rule 5: every endpoint requires an authenticated user unless it explicitly opts out.
         services.AddAuthorizationBuilder()
-            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
+            .AddPolicy(ChatbotPolicy, policy => policy
+                .RequireAuthenticatedUser()
+                .RequireAssertion(context => context.User.WasIssuedToClient(configuration[ChatbotClientIdKey])));
 
         return services;
+    }
+
+    /// <summary>
+    /// True when the token was issued to <paramref name="clientId"/>: the client application that requested it, in
+    /// <c>azp</c> (v2 tokens) or <c>appid</c> (v1 tokens). In an on-behalf-of token this is the chatbot, while
+    /// <c>oid</c> is still the patient. False when <paramref name="clientId"/> is not configured (fail closed).
+    /// </summary>
+    public static bool WasIssuedToClient(this ClaimsPrincipal user, string? clientId)
+    {
+        if (string.IsNullOrWhiteSpace(clientId))
+        {
+            return false;
+        }
+        var issuedTo = user.FindFirstValue("azp") ?? user.FindFirstValue("appid");
+        return string.Equals(issuedTo, clientId, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

@@ -33,6 +33,7 @@ public sealed class MedAppFactory(
             ["Auth:Mode"] = "LocalJwt",
             ["Fhir:Url"] = fhirUrl,
             ["Fhir:UseManagedIdentity"] = "false",
+            ["Chatbot:ClientId"] = ChatbotClientId,
             ["Logging:LogLevel:Default"] = "Trace",
             ["Logging:LogLevel:Microsoft"] = "Trace",
             ["Logging:LogLevel:Microsoft.AspNetCore"] = "Trace",
@@ -83,4 +84,10 @@ public sealed class MedAppFactory(
     }
 
     public HttpClient ClientFor(string? oid) => Client(Tokens.For(oid));
+
+    /// <summary>A client with a delegated (on-behalf-of) token: patient <paramref name="oid"/>, issued to the chatbot.</summary>
+    public HttpClient ChatbotClient(string? oid = SeedData.OidA) => Client(Tokens.For(oid, clientId: ChatbotClientId));
+
+    /// <summary>The chatbot app registration's client id in tests.</summary>
+    public const string ChatbotClientId = "medapp-test-chatbot";
 }

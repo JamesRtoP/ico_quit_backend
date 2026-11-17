@@ -55,7 +55,7 @@ internal sealed partial class CallerPatientResolver(IFhirGateway fhir, ILogger<C
 }
 
 /// <summary>
-/// Endpoint filter for the <c>/me</c> group: maps the token's oid to a FHIR Patient and stores it in
+/// Endpoint filter for the <c>/user</c> group: maps the token's oid to a FHIR Patient and stores it in
 /// <see cref="CallerPatient"/>. Returns 403 when the caller can't be mapped to exactly one Patient.
 /// </summary>
 internal sealed class CallerPatientFilter : IEndpointFilter

@@ -1,14 +1,14 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using MedApp.Api.Auth;
+using MedApp.Api.Chatbot;
 using MedApp.Api.Fhir;
 using MedApp.Api.Infrastructure;
-using MedApp.Api.Medications;
 using MedApp.Api.Patients;
+using MedApp.Api.Users;
 
 var builder = WebApplication.CreateBuilder(args);
-var isDevOrTest = builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment(AuthenticationSetup.TestingEnvironment);
+var isTesting = builder.Environment.IsEnvironment(AuthenticationSetup.TestingEnvironment);
+var isDevOrTest = builder.Environment.IsDevelopment() || isTesting;
 
 // Never log outbound HTTP (FHIR) request URIs/headers: search URLs carry identifiers. (HIPAA rule 2)
 builder.Services.ConfigureHttpClientDefaults(http => http.RemoveAllLoggers());
@@ -17,10 +17,6 @@ builder.Services.AddMedAppAuthentication(builder.Configuration, builder.Environm
 builder.Services.AddFhirGateway(builder.Configuration);
 builder.Services.AddScoped<ICallerPatientResolver, CallerPatientResolver>();
 builder.Services.AddScoped<CallerPatient>();
-builder.Services.AddSingleton(TimeProvider.System);
-
-builder.Services.ConfigureHttpJsonOptions(o =>
-    o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)));
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<SafeExceptionHandler>();
@@ -32,7 +28,9 @@ if (!string.IsNullOrWhiteSpace(appInsights))
     builder.Services.AddOpenTelemetry().UseAzureMonitor(o => o.ConnectionString = appInsights);
 }
 
-if (isDevOrTest)
+// The OpenAPI document is generated only so tests can snapshot it to docs/openapi.json (the contract the
+// chatbot imports). It is never served in Development or Production.
+if (isTesting)
 {
     builder.Services.AddMedAppOpenApi();
 }
@@ -53,22 +51,17 @@ if (!isDevOrTest)
 app.UseHttpsRedirection();
 // No CORS by design: callers are the mobile app and server-side clients only (rule 6).
 
-if (isDevOrTest)
-{
-    // Static UI middleware; must run before the fallback auth policy. The document itself is mapped below.
-    app.UseSwaggerUI(o => o.SwaggerEndpoint(OpenApiSetup.DocumentPath, "MedApp API v1"));
-}
-
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/healthz", () => TypedResults.Ok())
+app.MapGet("/status", () => TypedResults.Ok())
     .AllowAnonymous()
     .ExcludeFromDescription();
 
-app.MapMeEndpoints();
+app.MapUserEndpoints();
+app.MapChatbotEndpoints();
 
-if (isDevOrTest)
+if (isTesting)
 {
     app.MapOpenApi(OpenApiSetup.DocumentPath).AllowAnonymous();
 }

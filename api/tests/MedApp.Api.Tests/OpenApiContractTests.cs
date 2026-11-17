@@ -5,34 +5,28 @@ using MedApp.Api.Tests.Support;
 namespace MedApp.Api.Tests;
 
 /// <summary>
-/// The OpenAPI document is a deliverable for the mobile and chatbot teams. It is snapshotted at
-/// docs/openapi.json; an API change that alters the contract fails this test until the snapshot is
-/// regenerated deliberately: set UPDATE_OPENAPI_SNAPSHOT=1 and run the tests.
+/// The OpenAPI document is a deliverable for the mobile and chatbot teams (Foundry imports it as an OpenAPI
+/// tool). It is generated only in the Testing environment and snapshotted at docs/openapi.json; an API change
+/// that alters the contract fails this test until the snapshot is regenerated deliberately:
+/// set UPDATE_OPENAPI_SNAPSHOT=1 and run the tests.
 /// </summary>
 public sealed class OpenApiContractTests(InMemoryBackend backend) : IClassFixture<InMemoryBackend>
 {
     [Fact]
-    public async Task Contract_ExposesOnlyCallerScopedEndpoints_WithBearerAuth()
+    public async Task Contract_ExposesChatbotEndpoints_WithBearerAuth()
     {
         using var client = backend.Factory.Client();
         var doc = JsonNode.Parse(await client.GetStringAsync("/openapi/v1.json"))!;
 
         var paths = doc["paths"]!.AsObject().Select(p => p.Key).Order().ToList();
-        Assert.Equal(["/me/doses", "/me/medications"], paths);
+        Assert.Equal(["/chatbot/context", "/chatbot/responses"], paths);
         Assert.NotNull(doc["components"]?["securitySchemes"]?["Bearer"]);
 
         // No endpoint takes a patient identifier from the client.
         var text = doc.ToJsonString();
         Assert.DoesNotContain("\"patientId\"", text, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("\"subject\"", text, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Fact]
-    public async Task SwaggerUi_IsServedAnonymously_InDevAndTest()
-    {
-        using var client = backend.Factory.Client();
-
-        Assert.Equal(System.Net.HttpStatusCode.OK, (await client.GetAsync("/swagger/index.html")).StatusCode);
+        Assert.DoesNotContain("\"userId\"", text, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

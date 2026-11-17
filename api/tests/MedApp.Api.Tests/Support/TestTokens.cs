@@ -24,7 +24,7 @@ public sealed class TestTokens
         ["Authentication:Schemes:Bearer:SigningKeys:0:Value"] = Convert.ToBase64String(_key),
     };
 
-    public string For(string? oid, TimeSpan? lifetime = null, byte[]? signingKey = null)
+    public string For(string? oid, TimeSpan? lifetime = null, byte[]? signingKey = null, string? clientId = null)
     {
         var now = DateTime.UtcNow;
         var life = lifetime ?? TimeSpan.FromMinutes(10);
@@ -32,6 +32,10 @@ public sealed class TestTokens
         if (oid is not null)
         {
             claims.Add(new Claim("oid", oid));
+        }
+        if (clientId is not null)
+        {
+            claims.Add(new Claim("azp", clientId)); // client app the token was issued to (on-behalf-of: the chatbot)
         }
 
         var notBefore = life > TimeSpan.Zero ? now.AddMinutes(-1) : now.Add(life).AddMinutes(-10);

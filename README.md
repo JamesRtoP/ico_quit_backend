@@ -1,6 +1,6 @@
 # MedApp API
 
-Backend API for a medication-adherence app. ASP.NET Core (.NET 10) minimal APIs over FHIR R4.
+Backend API for a patient mobile app and a client-owned chatbot. ASP.NET Core (.NET 10) minimal APIs over FHIR R4.
 **Data is PHI under HIPAA. Use synthetic data only outside production.**
 
 - Contract: [docs/api-contract.md](docs/api-contract.md) · [docs/openapi.json](docs/openapi.json)
@@ -25,18 +25,26 @@ dotnet run --project api/src/MedApp.Api --launch-profile https
 
 Until `Fhir:Url` is set, the API refuses to start (fail closed).
 
-Get a token whose `oid` matches the `https://medapp.example/external-id` identifier of a **synthetic**
-Patient in that FHIR service:
+Check it's up (anonymous, empty 200):
 
 ```bash
-dotnet user-jwts create --project api/src/MedApp.Api --claim oid=<patient-oid>
+curl -k -i https://localhost:7180/status
+```
+
+`/user/*` (none yet) and `/chatbot/*` both act on the patient in the token: its `oid` must match the
+`https://medapp.example/external-id` identifier of a **synthetic** Patient in the FHIR service, or the API returns `403`.
+
+`/chatbot/*` also needs the token to be issued to the chatbot app (`azp` = `Chatbot:ClientId`, which is
+`medapp-local-chatbot` in Development). This imitates the on-behalf-of token the real chatbot will send. The
+endpoints are stubs, so a token that passes both checks gets `501`:
+
+```bash
+dotnet user-jwts create --project api/src/MedApp.Api --claim oid=<patient-oid> --claim azp=medapp-local-chatbot --output token
 ```
 
 ```bash
-curl -k https://localhost:7180/me/medications -H "Authorization: Bearer <token>"
+curl -k -i https://localhost:7180/chatbot/context -H "Authorization: Bearer <token>"
 ```
-
-A valid token with no linked Patient gets 403. Swagger UI (Development only) is at https://localhost:7180/swagger.
 
 ## Test
 

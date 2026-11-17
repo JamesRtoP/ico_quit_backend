@@ -3,7 +3,10 @@ using Microsoft.OpenApi;
 
 namespace MedApp.Api.Infrastructure;
 
-/// <summary>OpenAPI document (dev/test only) — the contract for the mobile and chatbot teams.</summary>
+/// <summary>
+/// OpenAPI document: the contract for the mobile and chatbot teams (Foundry imports it as an OpenAPI tool).
+/// Generated only in the Testing environment, where a test snapshots it to docs/openapi.json. Never served otherwise.
+/// </summary>
 internal static class OpenApiSetup
 {
     public const string DocumentPath = "/openapi/v1.json";
@@ -17,7 +20,7 @@ internal static class OpenApiSetup
                 {
                     Title = "MedApp API",
                     Version = "v1",
-                    Description = "Medication adherence API. All /me endpoints act on the authenticated caller only. Synthetic data only outside production.",
+                    Description = "MedApp API. /user endpoints act on the signed-in patient only (patient token). /chatbot endpoints act on the signed-in patient through the chatbot (delegated on-behalf-of token issued to the chatbot app). Synthetic data only outside production.",
                 };
                 document.Components ??= new OpenApiComponents();
                 document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
@@ -26,7 +29,7 @@ internal static class OpenApiSetup
                     Type = SecuritySchemeType.Http,
                     Scheme = "bearer",
                     BearerFormat = "JWT",
-                    Description = "Microsoft Entra External ID access token (locally: dotnet user-jwts).",
+                    Description = "Microsoft Entra access token: the patient's own External ID token for /user; for /chatbot, the patient's token exchanged by the chatbot via the on-behalf-of flow (locally: dotnet user-jwts).",
                 };
                 document.Security =
                 [

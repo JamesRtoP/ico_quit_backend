@@ -10,21 +10,11 @@ public static class SeedData
     public const string PatientA = "medapp-seed-a";
     public const string PatientB = "medapp-seed-b";
 
-    public const string A_Lisinopril = "medapp-seed-a-mr1";
-    public const string A_Metformin = "medapp-seed-a-mr2";
-    public const string A_AtorvastatinStopped = "medapp-seed-a-mr3";
-    public const string B_Sertraline = "medapp-seed-b-mr1";
-
-    public const string A_Dose1 = "medapp-seed-a-ma1";
-    public const string A_Dose2 = "medapp-seed-a-ma2";
-    public const string B_Dose1 = "medapp-seed-b-ma1";
-
-    /// <summary>Strings that must never appear in logs: names, birth dates, medication names, user oids.</summary>
+    /// <summary>Strings that must never appear in logs: names, birth dates, user oids.</summary>
     public static readonly string[] SensitiveStrings =
     [
         "Avery", "Quillfeather", "Blake", "Thornbury",
         "1971-03-14", "1984-09-02",
-        "Lisinopril", "Metformin", "Atorvastatin", "Sertraline",
         OidA, OidB, OidUnlinked,
     ];
 
